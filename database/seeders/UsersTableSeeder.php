@@ -15,7 +15,7 @@ class UsersTableSeeder extends Seeder
                 'name' => 'Employee',
                 'email' => 'employee@example.com',
                 'password' => Hash::make('password123'),
-                'role' => 'employee', // Changed from 'admin' to 'employee'
+                'role' => 'employee',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -27,6 +27,7 @@ class UsersTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            
         ]);
     }
 }

@@ -9,15 +9,15 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'total_price', 'status'];
+    protected $fillable = ['user_id', 'total_price', 'status','checkout_date'];
 
     // An order belongs to a user
     public function user() {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class);   
     }
 
     // An order can have multiple order items
-    public function orderItems() {
+    public function items() {
         return $this->hasMany(OrderItem::class);
     }
 }

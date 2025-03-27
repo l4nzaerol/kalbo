@@ -31,11 +31,12 @@ class OrderController extends Controller
             $totalPrice += $item->product->price * $item->quantity;
         }
 
-        // Create order
+        // Create order with checkout_date
         $order = Order::create([
             'user_id' => $user->id,
             'total_price' => $totalPrice,
-            'status' => 'pending'
+            'status' => 'pending',
+            'checkout_date' => now() // Set checkout date
         ]);
 
         // Add order items and update stock
@@ -58,6 +59,7 @@ class OrderController extends Controller
         return response()->json(['message' => 'Checkout successful', 'order_id' => $order->id]);
     }
 
+
     public function index()
     {
         $user = Auth::user();
@@ -77,4 +79,51 @@ class OrderController extends Controller
 
         return response()->json(Order::where('user_id', $user->id)->with('items.product')->get());
     }
+
+    public function show($id)
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'employee') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $order = Order::with('items.product', 'user')->find($id);
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        // Ensure items contain product details
+        $order->items->each(function ($item) {
+            $item->product_name = $item->product->name ?? 'Unknown Product';
+        });
+
+        return response()->json($order);
+    }
+
+
+    public function markAsComplete($id)
+    {
+        $user = Auth::user();
+
+        // Only employees can mark an order as complete
+        if (!$user || $user->role !== 'employee') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Find the order
+        $order = Order::find($id);
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        // Update the order status
+        $order->status = 'completed';
+        $order->save();
+
+        return response()->json(['message' => 'Order marked as complete']);
+    }
+
 }

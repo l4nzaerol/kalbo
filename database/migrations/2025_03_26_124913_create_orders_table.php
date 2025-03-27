@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->decimal('total_price', 8, 2);
             $table->enum('status', ['pending', 'completed'])->default('pending');
+            $table->timestamp('checkout_date')->nullable(); // Add checkout_date
             $table->timestamps();
         });
     }
