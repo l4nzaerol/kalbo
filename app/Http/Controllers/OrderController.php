@@ -40,18 +40,20 @@ class OrderController extends Controller
         ]);
 
         // Add order items and update stock
-        foreach ($cartItems as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->product->price
-            ]);
+        // Add order items and update stock
+foreach ($cartItems as $item) {
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $item->product_id,
+        'quantity' => $item->quantity,
+        'price' => $item->product->price * $item->quantity // Save the total price for the item
+    ]);
 
-            // Reduce stock
-            $item->product->stock -= $item->quantity;
-            $item->product->save();
-        }
+    // Reduce stock
+    $item->product->stock -= $item->quantity;
+    $item->product->save();
+}
+
 
         // Clear cart
         Cart::where('user_id', $user->id)->delete();
@@ -67,7 +69,13 @@ class OrderController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json(Order::with('user', 'items.product')->get());
+        return response()->json(Order::with(['user', 'items.product'])->get()->map(function ($order) {
+            $order->total_price = $order->items->sum(function ($item) {
+                return $item->price * $item->quantity;
+            });
+            return $order;
+        }));
+        
     }
 
     public function myOrders()
@@ -77,7 +85,13 @@ class OrderController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        return response()->json(Order::where('user_id', $user->id)->with('items.product')->get());
+        return response()->json(Order::with(['user', 'items.product'])->get()->map(function ($order) {
+            $order->total_price = $order->items->sum(function ($item) {
+                return $item->price * $item->quantity;
+            });
+            return $order;
+        }));
+        
     }
 
     public function show($id)

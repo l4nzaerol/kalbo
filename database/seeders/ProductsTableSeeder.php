@@ -15,7 +15,7 @@ class ProductsTableSeeder extends Seeder
                 'description' => 'High-performance laptop with 16GB RAM and 512GB SSD.',
                 'price' => 799.99,
                 'stock' => 10,
-                'image' => 'laptop.jpg',  // Ensure this file exists in storage/public/images
+                'image' => 'https://i5.walmartimages.com/asr/9dc2a21d-15b9-455e-a6a1-1ce51c8160ea.01c65474624eed67f2eac46afe9ddff5.jpeg',  // Ensure this file exists in storage/public/images
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
