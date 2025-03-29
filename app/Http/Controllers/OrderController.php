@@ -39,23 +39,18 @@ class OrderController extends Controller
             'checkout_date' => now() // Set checkout date
         ]);
 
-        // Add order items and update stock
-        // Add order items and update stock
 foreach ($cartItems as $item) {
     OrderItem::create([
         'order_id' => $order->id,
         'product_id' => $item->product_id,
         'quantity' => $item->quantity,
-        'price' => $item->product->price * $item->quantity // Save the total price for the item
+        'price' => $item->product->price * $item->quantity 
     ]);
 
-    // Reduce stock
     $item->product->stock -= $item->quantity;
     $item->product->save();
 }
 
-
-        // Clear cart
         Cart::where('user_id', $user->id)->delete();
 
         return response()->json(['message' => 'Checkout successful', 'order_id' => $order->id]);
@@ -63,36 +58,25 @@ foreach ($cartItems as $item) {
 
 
     public function index()
-    {
-        $user = Auth::user();
-        if (!$user || $user->role !== 'employee') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        return response()->json(Order::with(['user', 'items.product'])->get()->map(function ($order) {
-            $order->total_price = $order->items->sum(function ($item) {
-                return $item->price * $item->quantity;
-            });
-            return $order;
-        }));
-        
+{
+    $user = Auth::user();
+    if (!$user || $user->role !== 'employee') {
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
+
+    return response()->json(Order::with(['user', 'items.product'])->get());
+}
 
     public function myOrders()
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        return response()->json(Order::with(['user', 'items.product'])->get()->map(function ($order) {
-            $order->total_price = $order->items->sum(function ($item) {
-                return $item->price * $item->quantity;
-            });
-            return $order;
-        }));
-        
+{
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
+
+    return response()->json(Order::with(['user', 'items.product'])->where('user_id', $user->id)->get());
+}
+
 
     public function show($id)
     {
